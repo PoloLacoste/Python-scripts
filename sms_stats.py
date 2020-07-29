@@ -20,19 +20,18 @@ def toJson(file):
 	if os.path.exists(file):
 		print("Converting xml file %s..." % file)
 
-		tree = etree.parse(file)
-		root = tree.getroot()
-
-		for sms in root:
-			number = convertNumber(sms.get("address"))
-			if number is not None:
-				ts = sms.get("date")
-				if number in jason:
-					jason[number][ts] = sms.attrib
-				else:
-					jason[number] = {
-						ts: sms.attrib
-					}
+		for event, sms in etree.iterparse(file, events=('start', 'end', 'start-ns', 'end-ns')):
+			if(event == "start"):
+				number = convertNumber(sms.get("address"))
+				if number is not None:
+					ts = sms.get("date")
+					if ts is not None:
+						if number in jason:
+							jason[number][ts] = sms.attrib
+						else:
+							jason[number] = {
+								ts: sms.attrib
+							}
 	else:
 		print("This file doesn't exists !")
 	
