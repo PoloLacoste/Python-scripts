@@ -1,4 +1,4 @@
-import argparse, os, glob, logging
+import argparse, os, glob, logging, animation
 from multiprocessing import Pool
 from subprocess import Popen, PIPE, STDOUT
 
@@ -18,21 +18,25 @@ def pull(dir):
 	out = p.stdout.read().strip().decode("utf-8")
 	logging.info(out)
 
+@animation.simple_wait
+def getGitDirs():
+	dirs = glob.glob("%s/**/" % args.directory)
+	gitDirs = []
+
+	while len(dirs) > 0:
+		dir = dirs[0]
+
+		if os.path.exists("%s/.git/" % dir):
+			gitDirs.append(dir)
+		else:
+			if args.recursive:
+				dirs.extend(glob.glob("%s/**/" % dir))
+		dirs.pop(0)
+	return gitDirs
+		
+
 if __name__ == '__main__':
 	if os.path.exists(args.directory):
-
-		dirs = glob.glob("%s/**/" % args.directory)
-		gitDirs = []
-
-		while len(dirs) > 0:
-			dir = dirs[0]
-
-			if os.path.exists("%s/.git/" % dir):
-				gitDirs.append(dir)
-			else:
-				if args.recursive:
-					dirs.extend(glob.glob("%s/**/" % dir))
-			dirs.pop(0)
-
+		gitDirs = getGitDirs()
 		with Pool(8) as p:
 			p.map(pull, gitDirs)
