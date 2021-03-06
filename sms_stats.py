@@ -71,6 +71,10 @@ if __name__ == "__main__":
 
 		for ts, sms in conversations[phone].items():
 
+			#if "body" in sms and len(sms["body"]) > 500:
+			#	body = sms["body"]
+			#	print(f"{body}\n")
+
 			ts = int(ts) / 1000
 
 			try:
